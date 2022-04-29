@@ -12,27 +12,24 @@ name: Gets_all_changed_files,_find_tabs.
 on: [push]
   
 jobs:
-  find-tabs:
-    runs-on: ubuntu-latest  # windows-latest | macos-latest
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "The ${{ github.repository }} repository will be cloned to the runner."
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Check tabs in modified files
-        run: |
-          mkdir Artifacts
-          for file in $(git diff --name-only origin/main); do
-          (
-            a=$(awk '{print gsub(/\t/,"")}' $file | awk '{s+=$1} END { print s }')  
-            if ((a>0)); then
-              echo "Found '$file' with tabs"
-              echo "Checking file $file" > Artifacts/${file}_artifacts
-              echo "Count $a" >> Artifacts/${file}_artifacts  
-            fi
-          ) & 
-          done
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Artifacts
-          path: ./Artifacts/ 
+    - name: Git clone my repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v13.1
+
+    - name: Find tabs in changed files
+      run: |
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          grep -P "\t" $file >> report.log 2>&1
+        done
+    - name: Upload report
+      uses: actions/upload-artifact@v2
+      with:
+        path: report.log
