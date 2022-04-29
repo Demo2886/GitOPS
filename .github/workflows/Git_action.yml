@@ -1,0 +1,38 @@
+#------------------------------------------
+# GitHub Action Workflow
+#
+# Version      Date        Info
+# 1.0          2022        Initial Version
+#
+# Made by Alexandr Nefedin (c) 2022
+#-------------------------------------------
+
+name: Gets_all_changed_files,_find_tabs.
+
+on: [push]
+  
+jobs:
+  find-tabs:
+    runs-on: ubuntu-latest  # windows-latest | macos-latest
+    steps:
+      - run: echo "The ${{ github.repository }} repository will be cloned to the runner."
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Check tabs in modified files
+        run: |
+          mkdir Artifacts
+          for file in $(git diff --name-only origin/main); do
+          (
+            a=$(awk '{print gsub(/\t/,"")}' $file | awk '{s+=$1} END { print s }')  
+            if ((a>0)); then
+              echo "Found '$file' with tabs"
+              echo "Checking file $file" > Artifacts/${file}_artifacts
+              echo "Count $a" >> Artifacts/${file}_artifacts  
+            fi
+          ) & 
+          done
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Artifacts
+          path: ./Artifacts/ 
