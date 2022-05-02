@@ -13,7 +13,7 @@ on: [push]
   
 jobs:
   build:
-    runs-on: [my_test_runner] 
+    runs-on: [self-hosted] 
     name: Test changed-files
     steps:
       - uses: actions/checkout@v2
