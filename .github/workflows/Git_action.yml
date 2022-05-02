@@ -9,28 +9,31 @@
 
 name: Gets_all_changed_files,_find_tabs.
 
-on: [push]
+on:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
   
 jobs:
   build:
     runs-on: ubuntu-latest  
-    name: Test changed-files
+    name: Test_changed-files
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  
 
-      - name: Get changed files
+      - name: Get_changed_files
         id: changed-files
         uses: tj-actions/changed-files@v14.1
 
-      - name: List all changed files
+      - name: List_all_changed_files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             echo "$files was changed" >> files.log 2>&1
             echo "Count Tab in files: `grep -P '\t' $file | wc -l`" >> files.log 2>&1 
           done
-      - name: Upload report
+      - name: Upload_report
         uses: actions/upload-artifact@v2
         with:
           path: files.log
